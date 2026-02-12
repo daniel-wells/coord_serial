@@ -4,12 +4,14 @@
 \alias{simulate_gwas}
 \title{Simulate GWAS data}
 \usage{
-simulate_gwas(n = 1e+06, seed = 123)
+simulate_gwas(n = 1e+06, seed = 123, p_max = 1)
 }
 \arguments{
 \item{n}{Total number of variants to simulate.}
 
 \item{seed}{Random seed for reproducibility.}
+
+\item{p_max}{Maximum p-value for background distribution (default 1.0).}
 }
 \value{
 A data frame with columns \code{chrom}, \code{position}, \code{log10p}, and \code{causal}.

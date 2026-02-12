@@ -9,7 +9,8 @@ simulate_serial(
   domains = 10,
   domain_lengths = NULL,
   hit_domains = c(2, 5, 8),
-  seed = 123
+  seed = 123,
+  p_max = 1
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ domains get length 1e8.}
 values) should be generated.}
 
 \item{seed}{Random seed for reproducibility.}
+
+\item{p_max}{Maximum p-value for background distribution (default 1.0).}
 }
 \value{
 A data frame with columns \code{domain}, \code{position}, \code{log10p}, and \code{causal}.
