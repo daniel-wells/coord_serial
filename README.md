@@ -63,7 +63,7 @@ ggplot(exon_data, aes(x = position, y = log10p, domain = domain)) +
 # Simulate activity metrics for sessions with different durations (seconds)
 sessions <- simulate_serial(
     n = 2000,
-    domains = c("Monday", "Tuesday", "Wednesday", "Thursday"),
+    domains = c("A", "B", "C", "D"),
     domain_lengths = c(3600, 7200, 2400, 300)
 )
 # Add a random walk per session with randomized starting points
@@ -73,10 +73,7 @@ sessions$metric <- ave(rnorm(nrow(sessions)), sessions$domain, FUN = function(x)
 
 ggplot(sessions, aes(x = position, y = metric, domain = domain)) +
     geom_line(color = "#D55E00", linewidth = 0.8) +
-    coord_serial(
-        domain_gap = 0.1, 
-        domain_order = c("Monday", "Tuesday", "Wednesday", "Thursday")
-    ) +
+    coord_serial(domain_gap = 0.05) +
     theme_light() +
     labs(title = "System Load across Sessions", x = "Time (seconds)", y = "Load Metric")
 ```
