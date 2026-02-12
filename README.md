@@ -20,13 +20,17 @@ library(ggplot2)
 simulated_gwas <- simulate_gwas()
 
 # plot using the generalized coord_serial()
-ggplot(simulated_gwas, aes(x = position, y = log10p, domain = chrom, color = causal)) + \
-    geom_point(alpha = 0.5) + \
-    scale_color_manual(values = c("TRUE" = "red", "FALSE" = "grey40")) + \
-    coord_serial() + \
-    geom_hline(yintercept = 7.3, linetype = "dashed", color = "red") + \
-    theme_minimal() + \
-    theme(plot.background = element_rect(fill = "white", colour = NA)) + \
+p <- ggplot(simulated_gwas, aes(x = position,
+                                y = log10p,
+                                domain = chrom,
+                                color = causal)) +
+    geom_point(alpha = 0.5) +
+    coord_serial()
+
+p + scale_color_manual(values = c("TRUE" = "red", "FALSE" = "grey40")) +
+    geom_hline(yintercept = 7.3, linetype = "dashed", color = "red") +
+    theme_minimal() +
+    theme(plot.background = element_rect(fill = "white", colour = NA)) +
     labs(x = "Chromosome", color = "Causal Variant")
 ```
 
