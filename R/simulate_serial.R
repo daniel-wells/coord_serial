@@ -10,6 +10,7 @@
 #' @param hit_domains Optional vector of indices or names where "hits" (higher
 #'   values) should be generated.
 #' @param seed Random seed for reproducibility.
+#' @param p_max Maximum p-value for background distribution (default 1.0).
 #'
 #' @return A data frame with columns `domain`, `position`, `log10p`, and `causal`.
 #' @importFrom stats runif
@@ -18,7 +19,8 @@ simulate_serial <- function(n = 1000000,
                             domains = 10,
                             domain_lengths = NULL,
                             hit_domains = c(2, 5, 8),
-                            seed = 123) {
+                            seed = 123,
+                            p_max = 1.0) {
     set.seed(seed)
 
     if (is.numeric(domains) && length(domains) == 1) {
@@ -41,16 +43,18 @@ simulate_serial <- function(n = 1000000,
         dom_name <- domain_names[i]
         nn <- n_per_dom[i]
 
-        pos <- sort(sample.int(domain_lengths[i], nn))
-        log10p <- -log10(runif(nn))
+        pos <- sort(sample.int(domain_lengths[i], nn, replace = nn > domain_lengths[i]))
+        log10p <- -log10(runif(nn, 0, p_max))
         causal <- rep(FALSE, nn)
 
         # Add hits on select domains
         if (i %in% hit_domains || dom_name %in% hit_domains) {
-            n_hits <- sample(3:8, 1)
-            hit_idx <- sample(nn, n_hits)
-            log10p[hit_idx] <- -log10(10^(-runif(n_hits, 5, 10)))
-            causal[hit_idx] <- TRUE
+            n_hits <- min(nn, sample(3:8, 1))
+            if (n_hits > 0) {
+                hit_idx <- sample(nn, n_hits)
+                log10p[hit_idx] <- -log10(10^(-runif(n_hits, 5, 10)))
+                causal[hit_idx] <- TRUE
+            }
         }
 
         rows[[i]] <- data.frame(

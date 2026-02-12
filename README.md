@@ -36,6 +36,50 @@ p + scale_color_manual(values = c("TRUE" = "red", "FALSE" = "grey40")) +
 
 ![Manhattan Plot](man/figures/manhattan.png)
 
+## genomic domain visualization (Exons)
+Often you want to visualize a score or depth across multiple non-contiguous regions like exons. `coord_serial` makes this easy by treating exons as domains and automatically handling the spacing.
+
+```r
+# Simulate conservation scores for exons of varying lengths
+exon_data <- simulate_serial(
+    n = 1000, 
+    domains = c("Exon 1", "Exon 2", "Exon 3", "Exon 4"), 
+    domain_lengths = c(120, 300, 80, 200)
+)
+
+ggplot(exon_data, aes(x = position, y = log10p, domain = domain)) +
+    geom_area(fill = "#0072B2", alpha = 0.7) +
+    coord_serial(domain_gap = 0.05) +
+    theme_minimal() +
+    labs(title = "Conservation Scores across Exons", x = "Position", y = "Score")
+```
+
+![Exon Plot](man/figures/exons.png)
+
+## non-genomic time series (Daily Sessions)
+`coord_serial` isn't limited to biology. It can be used for any data where you want to stitch together disparate "blocks" of time or space into a single continuous view. Here is an example of monitoring system activity across different daily sessions with widely different durations.
+
+```r
+# Simulate activity metrics for sessions with different durations (seconds)
+sessions <- simulate_serial(
+    n = 2000,
+    domains = c("Monday", "Tuesday", "Wednesday", "Thursday"),
+    domain_lengths = c(3600, 7200, 2400, 300)
+)
+# Add a random walk per session with randomized starting points
+sessions$metric <- ave(rnorm(nrow(sessions)), sessions$domain, FUN = function(x) {
+    cumsum(x) + runif(1, -10, 10)
+})
+
+ggplot(sessions, aes(x = position, y = metric, domain = domain)) +
+    geom_line(color = "#D55E00", linewidth = 0.8) +
+    coord_serial(domain_gap = 0.1) +
+    theme_light() +
+    labs(title = "System Load across Sessions", x = "Time (seconds)", y = "Load Metric")
+```
+
+![Session Plot](man/figures/sessions.png)
+
 ## installation
 
 ```r
