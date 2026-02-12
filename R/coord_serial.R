@@ -202,7 +202,7 @@ CoordSerial <- ggplot2::ggproto("CoordSerial", ggplot2::CoordCartesian,
 #' @importFrom rlang as_name
 #' @method ggplot_add CoordSerial
 #' @export
-ggplot_add.CoordSerial <- function(object, plot, object_name) {
+ggplot_add.CoordSerial <- function(object, plot, ...) {
   plot$coordinates <- object
 
   # Use 'domain' aesthetic
