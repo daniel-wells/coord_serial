@@ -24,7 +24,7 @@ p <- ggplot(simulated_gwas, aes(x = position,
                                 y = log10p,
                                 domain = chrom,
                                 color = causal)) +
-    geom_point(alpha = 0.5) +
+    geom_point() +
     coord_serial()
 
 p + scale_color_manual(values = c("TRUE" = "red", "FALSE" = "grey40")) +
@@ -48,8 +48,8 @@ exon_data <- simulate_serial(
 )
 
 ggplot(exon_data, aes(x = position, y = log10p, domain = domain)) +
-    geom_area(fill = "#0072B2", alpha = 0.7) +
-    coord_serial(domain_gap = 0.05) +
+    geom_area(fill = "#0072B2") +
+    coord_serial() +
     theme_minimal() +
     labs(title = "Conservation Scores across Exons", x = "Position", y = "Score")
 ```
@@ -72,8 +72,8 @@ sessions$metric <- ave(rnorm(nrow(sessions)), sessions$domain, FUN = function(x)
 })
 
 ggplot(sessions, aes(x = position, y = metric, domain = domain)) +
-    geom_line(color = "#D55E00", linewidth = 0.8) +
-    coord_serial(domain_gap = 0.05) +
+    geom_line(color = "#D55E00") +
+    coord_serial() +
     theme_light() +
     labs(title = "System Load across Sessions", x = "Time (seconds)", y = "Load Metric")
 ```
