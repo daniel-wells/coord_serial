@@ -73,7 +73,10 @@ sessions$metric <- ave(rnorm(nrow(sessions)), sessions$domain, FUN = function(x)
 
 ggplot(sessions, aes(x = position, y = metric, domain = domain)) +
     geom_line(color = "#D55E00", linewidth = 0.8) +
-    coord_serial(domain_gap = 0.1) +
+    coord_serial(
+        domain_gap = 0.1, 
+        domain_order = c("Monday", "Tuesday", "Wednesday", "Thursday")
+    ) +
     theme_light() +
     labs(title = "System Load across Sessions", x = "Time (seconds)", y = "Load Metric")
 ```
