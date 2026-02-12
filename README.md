@@ -47,8 +47,8 @@ exon_data <- simulate_serial(
     domain_lengths = c(120, 300, 80, 200)
 )
 
-ggplot(exon_data, aes(x = position, y = log10p, domain = domain)) +
-    geom_area(fill = "#0072B2") +
+ggplot(exon_data, aes(x = position, y = log10p, domain = domain, fill = domain)) +
+    geom_area(show.legend = FALSE) +
     coord_serial() +
     theme_minimal() +
     labs(title = "Conservation Scores across Exons", x = "Position", y = "Score")
@@ -71,8 +71,8 @@ sessions$metric <- ave(rnorm(nrow(sessions)), sessions$domain, FUN = function(x)
     cumsum(x) + runif(1, -10, 10)
 })
 
-ggplot(sessions, aes(x = position, y = metric, domain = domain)) +
-    geom_line(color = "#D55E00") +
+ggplot(sessions, aes(x = position, y = metric, domain = domain, color = domain)) +
+    geom_line(show.legend = FALSE) +
     coord_serial() +
     theme_light() +
     labs(title = "System Load across Sessions", x = "Time (seconds)", y = "Load Metric")
