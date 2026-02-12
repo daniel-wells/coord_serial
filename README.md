@@ -1,5 +1,9 @@
 # coord_serial - plot grouped serial data along a continuous axis
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/daniel-wells/coord_serial/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/daniel-wells/coord_serial/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 This is an R package - an extension of the `ggplot2` package - for plotting data along a continuous axis composed of multiple discrete domains (like chromosomes in a manhattan plot), in a grammar of graphics approach without the need for bespoke data pre-processing.
 
 Unlike other packages like fastman, `coord_serial` does not create a new function to plot a manhattan plot with many customisation arguments. Instead, it provides a new coordinate system, `coord_serial()`, that can be used with `ggplot2` to plot data along the genome and so allows full customisation of the plot using the `ggplot2` framework.
