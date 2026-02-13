@@ -205,31 +205,66 @@ CoordSerial <- ggplot2::ggproto("CoordSerial", ggplot2::CoordCartesian,
 ggplot_add.CoordSerial <- function(object, plot, ...) {
   plot$coordinates <- object
 
-  # Use 'domain' aesthetic
+  # 1. Determine the mapping columns from the main plot mapping
   domain_mapping <- plot$mapping$domain
   x_mapping <- plot$mapping$x
 
-  if (!is.null(domain_mapping) && !is.null(x_mapping)) {
-    domain_col <- rlang::as_name(domain_mapping)
-    x_col <- rlang::as_name(x_mapping)
+  if (is.null(domain_mapping) || is.null(x_mapping)) {
+    return(plot)
+  }
 
-    if (!is.null(plot$data) && nrow(plot$data) > 0 &&
-      domain_col %in% names(plot$data) && x_col %in% names(plot$data)) {
-      layout <- compute_serial_layout(
-        positions    = plot$data[[x_col]],
-        domains      = plot$data[[domain_col]],
-        domain_order = object$domain_order,
-        domain_gap   = object$domain_gap
-      )
+  domain_col <- rlang::as_name(domain_mapping)
+  x_col <- rlang::as_name(x_mapping)
 
-      domain_char <- as.character(plot$data[[domain_col]])
-      plot$data[[x_col]] <- plot$data[[x_col]] + layout$offsets[domain_char]
-      plot$coordinates$.serial_layout <- layout
+  # 2. Compute layout using the union of ALL data (plot data + layer data)
+  # This ensures all domains from all layers are accounted for in the layout.
+  all_x <- plot$data[[x_col]]
+  all_dom <- as.character(plot$data[[domain_col]])
+
+  for (layer in plot$layers) {
+    l_data <- layer$data %||% plot$data
+    if (!is.null(l_data) && domain_col %in% names(l_data) && x_col %in% names(l_data)) {
+      all_x <- c(all_x, l_data[[x_col]])
+      all_dom <- c(all_dom, as.character(l_data[[domain_col]]))
+    }
+  }
+
+  if (length(all_x) == 0) {
+    return(plot)
+  }
+
+  layout <- compute_serial_layout(
+    positions    = all_x,
+    domains      = all_dom,
+    domain_order = object$domain_order,
+    domain_gap   = object$domain_gap
+  )
+  plot$coordinates$.serial_layout <- layout
+
+  # 3. Transform the main plot data
+  if (!is.null(plot$data) && domain_col %in% names(plot$data) && x_col %in% names(plot$data)) {
+    domain_char <- as.character(plot$data[[domain_col]])
+    plot$data[[x_col]] <- plot$data[[x_col]] + layout$offsets[domain_char]
+  }
+
+  # 4. Transform ALL layer data
+  for (i in seq_along(plot$layers)) {
+    # If the layer has its own data, we MUST transform it
+    if (!is.null(plot$layers[[i]]$data) && !is.waive(plot$layers[[i]]$data)) {
+      l_data <- plot$layers[[i]]$data
+      if (domain_col %in% names(l_data) && x_col %in% names(l_data)) {
+        domain_char <- as.character(l_data[[domain_col]])
+        l_data[[x_col]] <- l_data[[x_col]] + layout$offsets[domain_char]
+        plot$layers[[i]]$data <- l_data
+      }
     }
   }
 
   plot
 }
+
+# Helper to check for waive
+is.waive <- function(x) inherits(x, "waiver")
 
 
 # Small utility: NULL-default operator
