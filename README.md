@@ -91,5 +91,5 @@ ggplot(sessions, aes(x = position, y = metric, domain = domain, color = domain))
 ## Installation
 
 ```r
-devtools::install_github("daniel-wells/coord_serial")
+remotes::install_github("daniel-wells/coord_serial")
 ```
