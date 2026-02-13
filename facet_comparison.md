@@ -27,6 +27,8 @@ ggplot(simulated_gwas, aes(x = position, y = log10p)) +
     )
 ```
 
+![Manhattan facet_grid](man/figures/manhattan_facet.png)
+
 ## The `coord_serial` Approach
 
 ```r
@@ -38,9 +40,7 @@ p <- ggplot(simulated_gwas, aes(x = position, y = log10p, domain = chrom, color 
     theme_minimal()
 ```
 
-| `facet_grid` (Fragmented) | `coord_serial` (Unified) |
-| :--- | :--- |
-| ![Manhattan facet_grid](man/figures/manhattan_facet.png) | ![Manhattan coord_serial](man/figures/manhattan.png) |
+![Manhattan coord_serial](man/figures/manhattan.png)
 
 ## Key Advantages of `coord_serial()`
 
