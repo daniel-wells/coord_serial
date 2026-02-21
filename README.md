@@ -8,7 +8,7 @@ This is an R package - an extension of the `ggplot2` package - for plotting data
 
 Most current approaches require either manual pre-calculation of the new axis, or use a wrapper function which limits the customisability of the ggplot framework.
 
-The idiomatic `ggplot2` approach is to provide a new coordinate system, `coord_serial()`, that can be used with `ggplot2` to plot data along a single axis.
+The idiomatic `ggplot2` approach is to provide a new [coordinate system](https://ggplot2-book.org/coord.html), `coord_serial()`, that can be used with `ggplot2` to plot data along a single axis.
 
 The benefits of this approach are:
 - no bespoke data pre-processing
