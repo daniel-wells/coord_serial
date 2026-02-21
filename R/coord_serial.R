@@ -14,6 +14,9 @@
 #'   length. Default `0.01` (1%).
 #' @param domain_order Vector specifying the order of domains. If `NULL`
 #'   (the default), domains are sorted naturally.
+#' @param scaffold Optional named vector of domain lengths. If provided, these
+#'   lengths are used instead of calculating them from the data. This allows
+#'   showing empty regions or missing domains.
 #' @param ylim Numeric vector of length 2 giving y-axis limits, or `NULL`
 #'   (default) for automatic limits.
 #' @param expand If `TRUE` (the default), adds a small expansion factor to the
@@ -33,15 +36,23 @@
 #'   geom_point(size = 0.5) +
 #'   coord_serial()
 #'
+#' # Use a scaffold to show all chromosomes even if some are missing data
+#' hg38 <- c("1" = 248956422, "2" = 242193529, "X" = 156040895)
+#' ggplot(simulated_gwas, aes(x = position, y = log10p, domain = chrom)) +
+#'   geom_point(size = 0.5) +
+#'   coord_serial(scaffold = hg38)
+#'
 #' @export
 coord_serial <- function(domain_gap = 0.01,
                          domain_order = NULL,
+                         scaffold = NULL,
                          ylim = NULL,
                          expand = TRUE,
                          clip = "on") {
   ggplot2::ggproto(NULL, CoordSerial,
     domain_gap   = domain_gap,
     domain_order = domain_order,
+    scaffold     = scaffold,
     limits       = list(x = NULL, y = ylim),
     expand       = expand,
     clip         = clip
@@ -93,31 +104,56 @@ sort_domains <- function(domains) {
 #' @param positions Numeric vector of positions.
 #' @param domains Vector of domain identifiers (same length as `positions`).
 #' @param domain_order Optional vector of domain order.
-#' @param domain_gap Gap between domains as a fraction of total length.
+#' @param scaffold Optional named vector of positions or lengths.
 #' @return A list with elements `domain_levels`, `offsets`, `midpoints`,
 #'   `total_range`.
 #' @keywords internal
 compute_serial_layout <- function(positions, domains, domain_order = NULL,
-                                  domain_gap = 0.01) {
+                                  domain_gap = 0.01, scaffold = NULL) {
   domains <- as.character(domains)
 
-  # Determine domain order
-  if (!is.null(domain_order)) {
-    domain_levels <- as.character(domain_order)
+  # Determine domain order and lengths
+  if (!is.null(scaffold)) {
+    # If scaffold is provided, it defines the set of domains and their lengths
+    if (is.null(names(scaffold))) {
+      stop("scaffold must be a named vector of domain lengths.")
+    }
+    
+    if (!is.null(domain_order)) {
+      domain_levels <- as.character(domain_order)
+      # Check that all ordered domains are in scaffold
+      missing <- setdiff(domain_levels, names(scaffold))
+      if (length(missing) > 0) {
+        stop("Some domains in domain_order are missing from scaffold: ", 
+             paste(missing, collapse = ", "))
+      }
+    } else {
+      domain_levels <- names(scaffold)
+    }
+
+    domain_lengths <- scaffold[domain_levels]
+    domain_min <- setNames(rep(0, length(domain_levels)), domain_levels)
+    domain_max <- domain_lengths
   } else {
-    domain_levels <- sort_domains(domains)
+    # Determine domain order from data
+    if (!is.null(domain_order)) {
+      domain_levels <- as.character(domain_order)
+    } else {
+      domain_levels <- sort_domains(domains)
+    }
+
+    domain_f <- factor(domains, levels = domain_levels)
+
+    # Per-domain min and max positions from data
+    domain_min <- tapply(positions, domain_f, min, na.rm = TRUE)
+    domain_max <- tapply(positions, domain_f, max, na.rm = TRUE)
+
+    domain_min[is.infinite(domain_min)] <- 0
+    domain_max[is.infinite(domain_max)] <- 0
+
+    domain_lengths <- domain_max - domain_min
   }
 
-  domain_f <- factor(domains, levels = domain_levels)
-
-  # Per-domain min and max positions
-  domain_min <- tapply(positions, domain_f, min, na.rm = TRUE)
-  domain_max <- tapply(positions, domain_f, max, na.rm = TRUE)
-
-  domain_min[is.infinite(domain_min)] <- 0
-  domain_max[is.infinite(domain_max)] <- 0
-
-  domain_lengths <- domain_max - domain_min
   total_length <- sum(domain_lengths, na.rm = TRUE)
   gap <- domain_gap * total_length
 
@@ -134,7 +170,7 @@ compute_serial_layout <- function(positions, domains, domain_order = NULL,
     cumul <- cumul + domain_lengths[dom] + gap
   }
 
-  total_range <- c(0, cumul - gap)
+  total_range <- unname(c(0, cumul - gap))
 
   list(
     domain_levels = domain_levels,
@@ -158,6 +194,7 @@ CoordSerial <- ggplot2::ggproto("CoordSerial", ggplot2::CoordCartesian,
   # --- fields ---------------------------------------------------------------
   domain_gap = 0.01,
   domain_order = NULL,
+  scaffold = NULL,
 
   # --- setup_panel_params ---------------------------------------------------
   setup_panel_params = function(self, scale_x, scale_y, params = list()) {
@@ -237,7 +274,8 @@ ggplot_add.CoordSerial <- function(object, plot, ...) {
     positions    = all_x,
     domains      = all_dom,
     domain_order = object$domain_order,
-    domain_gap   = object$domain_gap
+    domain_gap   = object$domain_gap,
+    scaffold     = object$scaffold
   )
   plot$coordinates$.serial_layout <- layout
 

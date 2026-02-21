@@ -111,3 +111,35 @@ test_that("coord_serial handles empty data frame", {
 
     expect_no_error(ggplot_build(p))
 })
+
+test_that("scaffold works correctly", {
+    # 1. compute_serial_layout with scaffold
+    scaffold <- c("A" = 100, "B" = 200)
+    layout <- compute_serial_layout(numeric(0), character(0), scaffold = scaffold, domain_gap = 0)
+    
+    expect_equal(layout$domain_levels, c("A", "B"))
+    expect_equal(layout$offsets[["A"]], 0)
+    expect_equal(layout$offsets[["B"]], 100)
+    expect_equal(layout$total_range, c(0, 300))
+    
+    # 2. Reordering scaffold
+    layout_ord <- compute_serial_layout(numeric(0), character(0), 
+                                        scaffold = scaffold, 
+                                        domain_order = c("B", "A"), 
+                                        domain_gap = 0)
+    expect_equal(layout_ord$domain_levels, c("B", "A"))
+    expect_equal(layout_ord$offsets[["B"]], 0)
+    expect_equal(layout_ord$offsets[["A"]], 200)
+
+    # 3. ggplot integration
+    df <- data.frame(pos = 10, chr = "A", val = 1)
+    p <- ggplot(df, aes(x = pos, y = val, domain = chr)) +
+        geom_point() +
+        coord_serial(scaffold = scaffold, domain_gap = 0)
+    
+    pb <- ggplot_build(p)
+    expect_equal(pb$data[[1]]$x, 10)
+    
+    # Total range should reflect scaffold
+    expect_equal(pb$plot$coordinates$.serial_layout$total_range, c(0, 300))
+})

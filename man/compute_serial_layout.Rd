@@ -8,7 +8,8 @@ compute_serial_layout(
   positions,
   domains,
   domain_order = NULL,
-  domain_gap = 0.01
+  domain_gap = 0.01,
+  scaffold = NULL
 )
 }
 \arguments{
@@ -18,7 +19,7 @@ compute_serial_layout(
 
 \item{domain_order}{Optional vector of domain order.}
 
-\item{domain_gap}{Gap between domains as a fraction of total length.}
+\item{scaffold}{Optional named vector of positions or lengths.}
 }
 \value{
 A list with elements \code{domain_levels}, \code{offsets}, \code{midpoints},

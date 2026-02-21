@@ -44,6 +44,22 @@ ggsave('man/figures/manhattan.png', width = 12, height = 5)
 
 ![Manhattan Plot](man/figures/manhattan.png)
 
+### Scaffolding (fixed domain lengths)
+
+By default, the length of each domain is calculated from the the input data. However, you can provide a `scaffold` (a named vector) to specify fixed lengths. This is particularly useful to spot missing data in QC.
+
+The package provides built-in scaffolds for human genome assemblies: `grch37` and `grch38`.
+
+```r
+# Use the built-in GRCh38 scaffold
+p = ggplot(simulated_gwas[simulated_gwas$chrom != "5", ], aes(x = position, y = log10p, domain = chrom)) +
+    geom_point() +
+    coord_serial(scaffold = grch38)
+ggsave('man/figures/manhattan_scaffold.png', p, width = 12, height = 5)
+```
+
+![Manhattan Plot with Scaffold](man/figures/manhattan_scaffold.png)
+
 ## genomic domain visualization (Exons)
 Often you want to visualize a score or depth across multiple non-contiguous regions like exons. `coord_serial` makes this easy by treating exons as domains and automatically handling the spacing.
 

@@ -7,6 +7,7 @@
 coord_serial(
   domain_gap = 0.01,
   domain_order = NULL,
+  scaffold = NULL,
   ylim = NULL,
   expand = TRUE,
   clip = "on"
@@ -18,6 +19,10 @@ length. Default \code{0.01} (1\%).}
 
 \item{domain_order}{Vector specifying the order of domains. If \code{NULL}
 (the default), domains are sorted naturally.}
+
+\item{scaffold}{Optional named vector of domain lengths. If provided, these
+lengths are used instead of calculating them from the data. This allows
+showing empty regions or missing domains.}
 
 \item{ylim}{Numeric vector of length 2 giving y-axis limits, or \code{NULL}
 (default) for automatic limits.}
@@ -52,5 +57,11 @@ simulated_gwas <- simulate_gwas()
 ggplot(simulated_gwas, aes(x = position, y = log10p, domain = chrom)) +
   geom_point(size = 0.5) +
   coord_serial()
+
+# Use a scaffold to show all chromosomes even if some are missing data
+hg38 <- c("1" = 248956422, "2" = 242193529, "X" = 156040895)
+ggplot(simulated_gwas, aes(x = position, y = log10p, domain = chrom)) +
+  geom_point(size = 0.5) +
+  coord_serial(scaffold = hg38)
 
 }
