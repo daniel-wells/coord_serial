@@ -61,7 +61,7 @@ ggsave('man/figures/manhattan_scaffold.png', p, width = 12, height = 5)
 ![Manhattan Plot with Scaffold](man/figures/manhattan_scaffold.png)
 
 ## genomic domain visualization (Exons)
-Often you want to visualize a score or depth across multiple non-contiguous regions like exons. `coord_serial` makes this easy by treating exons as domains and automatically handling the spacing.
+An alternative use case within genomics is visualisation of data across exons of a gene.
 
 ```r
 # Simulate conservation scores for exons of varying lengths
@@ -80,8 +80,8 @@ ggplot(exon_data, aes(x = position, y = log10p, domain = domain, fill = domain))
 
 ![Exon Plot](man/figures/exons.png)
 
-## non-genomic time series (Daily Sessions)
-`coord_serial` isn't limited to biology. It can be used for any data where you want to stitch together disparate "blocks" of time or space into a single continuous view. Here is an example of monitoring system activity across different daily sessions with widely different durations.
+## non-genomic time series
+Outside of genomics, `coord_serial` can be used for plotting data across "blocks" of time or space into a single continuous view. Here is an example of monitoring system activity across sessions with different durations.
 
 ```r
 # Simulate activity metrics for sessions with different durations (seconds)
