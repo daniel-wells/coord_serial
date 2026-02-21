@@ -4,13 +4,15 @@
 [![R-CMD-check](https://github.com/daniel-wells/coord_serial/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/daniel-wells/coord_serial/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-This is an R package - an extension of the `ggplot2` package - for plotting data along a continuous axis composed of multiple discrete domains (like chromosomes in a manhattan plot), in a grammar of graphics approach:
+This is an R package - an extension of the `ggplot2` package - for plotting data along a continuous axis composed of multiple discrete domains (e.g. chromosomes in a Manhattan plot), using a grammar of graphics approach.
+
+Most current approaches require either manual pre-calculation of the new axis, or use a wrapper function which limits the customisability of the ggplot framework.
+
+The idiomatic `ggplot2` approach is to provide a new coordinate system, `coord_serial()`, that can be used with `ggplot2` to plot data along a single axis.
+
+The benefits of this approach are:
 - no bespoke data pre-processing
-- full customisation using the `ggplot2` framework
-
-This is achieved by providing a new coordinate system, `coord_serial()`, that can be used with `ggplot2` to plot data along a single axis.
-
-
+- full interoperability with other `ggplot2` components
 
 ## Example
 
@@ -21,25 +23,23 @@ library(coord.serial)
 library(ggplot2)
 
 # genetics-specific example data
-simulated_gwas <- simulate_gwas()
-
-# Create a label for a specific hit
-target_hit <- simulated_gwas[simulated_gwas$chrom == "17" & simulated_gwas$causal, ][1, ]
-target_hit$label <- "rs9823673"
+simulated_gwas <- simulate_gwas(p_max=0.05)
 
 # plot using the generalized coord_serial()
 p <- ggplot(simulated_gwas, aes(x = position,
                                 y = log10p,
                                 domain = chrom,
-                                color = causal)) +
+                                colour = causal)) +
     geom_point() +
-    geom_text(data = target_hit, aes(label = label), vjust = -1, size = 5, color = "black") +
-    geom_hline(yintercept = 7.3, linetype = "dashed", color = "red") +
     coord_serial()
 
+# extra formatting
 p + scale_color_manual(values = c("TRUE" = "red", "FALSE" = "grey40")) +
     theme_minimal() +
-    labs(x = "Chromosome", color = "Causal Variant")
+    labs(x = "Chromosome", color = "Causal Variant") +
+    geom_hline(yintercept = 7.3, linetype = "dashed", color = "red")
+
+ggsave('man/figures/manhattan.png', width = 12, height = 5)
 ```
 
 ![Manhattan Plot](man/figures/manhattan.png)

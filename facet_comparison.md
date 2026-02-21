@@ -15,7 +15,7 @@ target_hit$label <- "rs9823673"
 
 ggplot(simulated_gwas, aes(x = position, y = log10p)) +
     geom_point(aes(color = causal)) +
-    geom_text(data = target_hit, aes(label = label), vjust = -1, size = 5) +
+    geom_text(data = target_hit, aes(label = label), vjust = -1) +
     geom_hline(yintercept = -log10(5e-8), color = "red", linetype = "dashed") +
     facet_grid(. ~ chrom, scales = "free_x", space = "free_x", switch = "x") +
     coord_cartesian(clip = "off") + # Attempt to prevent label clipping
@@ -34,13 +34,13 @@ ggplot(simulated_gwas, aes(x = position, y = log10p)) +
 ```r
 p <- ggplot(simulated_gwas, aes(x = position, y = log10p, domain = chrom, color = causal)) +
     geom_point() +
-    geom_text(data = target_hit, aes(label = label), vjust = -1, size = 5) +
+    geom_text(data = target_hit, aes(label = label), vjust = -1) +
     geom_hline(yintercept = -log10(5e-8), color = "red", linetype = "dashed") +
     coord_serial() +
     theme_minimal()
 ```
 
-![Manhattan coord_serial](man/figures/manhattan.png)
+![Manhattan coord_serial](man/figures/manhattan_label.png)
 
 ## Key Advantages of `coord_serial()`
 
