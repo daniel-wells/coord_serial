@@ -1,4 +1,4 @@
-# coord_serial - plot grouped serial data along a continuous axis
+# coord_serial - idiomatic Manhattan plots in ggplot2
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/daniel-wells/coord_serial/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/daniel-wells/coord_serial/actions/workflows/R-CMD-check.yaml)
