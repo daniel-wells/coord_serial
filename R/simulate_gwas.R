@@ -21,7 +21,7 @@ simulate_gwas <- function(n = 1000000, seed = 123, p_max = 1.0) {
 
     # Use the generic engine
     df <- simulate_serial(
-        n = n,
+        n = n * p_max,
         domains = chrom_names,
         domain_lengths = chrom_lengths_mb * 1e6,
         hit_domains = c("3", "6", "11", "17"),
