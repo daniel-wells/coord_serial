@@ -7,3 +7,5 @@ src/*.o
 src/*.so
 src/*.dll
 *.tar.gz
+.nix-R-library/
+.nix-R-user-library/

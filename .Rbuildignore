@@ -4,3 +4,11 @@
 ^LICENSE\.md$
 ^\.github$
 ^data-raw$
+^flake\.nix$
+^flake\.lock$
+^nix$
+^index\.qmd$
+^index\.html$
+^index_files$
+^\.nix-R-library$
+^\.nix-R-user-library$
