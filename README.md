@@ -44,6 +44,20 @@ ggsave('man/figures/manhattan.png', width = 12, height = 5)
 
 ![Manhattan Plot](man/figures/manhattan.png)
 
+Because the coordinate system is seperated from the geom, you can swap it out.
+For example, often there are many points and don't need to plot them all at this scale, so we could instead use geom_bin_2d:
+
+```r
+ <- ggplot(simulated_gwas, aes(x = position,
+                                y = log10p,
+                                domain = chrom)) +
+    geom_bin_2d(bins=list(x=200, y=100)) +
+    coord_serial()
+ggsave('man/figures/manhattan_geom_bin_2d.png', width = 12, height = 5)
+```
+
+![Binned Manhattan plot](man/figures/manhattan_geom_bin_2d.png)
+
 ### Scaffolding (fixed domain lengths)
 
 By default, the length of each domain is calculated from the the input data. However, you can provide a `scaffold` (a named vector) to specify fixed lengths. This is particularly useful to spot missing data in QC.
@@ -78,6 +92,8 @@ ggplot(exon_data, aes(x = position, y = log10p, domain = domain, fill = domain))
     labs(title = "Conservation Scores across Exons", x = "Position", y = "Score")
 ```
 
+Note again, we can use alternative geoms, in this case geom_area.
+
 ![Exon Plot](man/figures/exons.png)
 
 ## non-genomic time series
@@ -109,3 +125,17 @@ ggplot(sessions, aes(x = position, y = metric, domain = domain, color = domain))
 ```r
 remotes::install_github("daniel-wells/coord_serial")
 ```
+
+## Nix-based local testing
+
+If you use Nix, this repository includes a development shell with R and package dependencies.
+
+```bash
+nix develop
+./nix/test-package.sh
+```
+
+This script will:
+- build the package tarball from source
+- install the tarball into the current R environment
+- run tests in tests/testthat

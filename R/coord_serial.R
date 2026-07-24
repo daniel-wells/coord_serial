@@ -260,10 +260,31 @@ ggplot_add.CoordSerial <- function(object, plot, ...) {
 
   for (layer in plot$layers) {
     l_data <- layer$data %||% plot$data
-    if (!is.null(l_data) && domain_col %in% names(l_data) && x_col %in% names(l_data)) {
-      all_x <- c(all_x, l_data[[x_col]])
-      all_dom <- c(all_dom, as.character(l_data[[domain_col]]))
-    }
+    layer_x_col <- mapped_col_name(layer$mapping, "x", x_col)
+    layer_xend_col <- mapped_col_name(layer$mapping, "xend")
+    layer_xmin_col <- mapped_col_name(layer$mapping, "xmin")
+    layer_xmax_col <- mapped_col_name(layer$mapping, "xmax")
+    layer_domain_col <- mapped_col_name(layer$mapping, "domain", domain_col)
+    layer_domain_x_col <- serial_domain_col(l_data, layer_domain_col, "domain_x")
+    layer_domain_end_col <- serial_domain_col(l_data, layer_domain_col, "domain_end", layer_domain_x_col)
+    layer_domain_xmin_col <- serial_domain_col(l_data, layer_domain_col, "domain_xmin")
+    layer_domain_xmax_col <- serial_domain_col(l_data, layer_domain_col, "domain_xmax", layer_domain_xmin_col)
+
+    positions <- append_serial_positions(all_x, all_dom, l_data, layer_x_col, layer_domain_x_col)
+    all_x <- positions$all_x
+    all_dom <- positions$all_dom
+
+    positions <- append_serial_positions(all_x, all_dom, l_data, layer_xend_col, layer_domain_end_col)
+    all_x <- positions$all_x
+    all_dom <- positions$all_dom
+
+    positions <- append_serial_positions(all_x, all_dom, l_data, layer_xmin_col, layer_domain_xmin_col)
+    all_x <- positions$all_x
+    all_dom <- positions$all_dom
+
+    positions <- append_serial_positions(all_x, all_dom, l_data, layer_xmax_col, layer_domain_xmax_col)
+    all_x <- positions$all_x
+    all_dom <- positions$all_dom
   }
 
   if (length(all_x) == 0) {
@@ -290,11 +311,21 @@ ggplot_add.CoordSerial <- function(object, plot, ...) {
     # If the layer has its own data, we MUST transform it
     if (!is.null(plot$layers[[i]]$data) && !is.waive(plot$layers[[i]]$data)) {
       l_data <- plot$layers[[i]]$data
-      if (domain_col %in% names(l_data) && x_col %in% names(l_data)) {
-        domain_char <- as.character(l_data[[domain_col]])
-        l_data[[x_col]] <- l_data[[x_col]] + layout$offsets[domain_char]
-        plot$layers[[i]]$data <- l_data
-      }
+      layer_x_col <- mapped_col_name(plot$layers[[i]]$mapping, "x", x_col)
+      layer_xend_col <- mapped_col_name(plot$layers[[i]]$mapping, "xend")
+      layer_xmin_col <- mapped_col_name(plot$layers[[i]]$mapping, "xmin")
+      layer_xmax_col <- mapped_col_name(plot$layers[[i]]$mapping, "xmax")
+      layer_domain_col <- mapped_col_name(plot$layers[[i]]$mapping, "domain", domain_col)
+      layer_domain_x_col <- serial_domain_col(l_data, layer_domain_col, "domain_x")
+      layer_domain_end_col <- serial_domain_col(l_data, layer_domain_col, "domain_end", layer_domain_x_col)
+      layer_domain_xmin_col <- serial_domain_col(l_data, layer_domain_col, "domain_xmin")
+      layer_domain_xmax_col <- serial_domain_col(l_data, layer_domain_col, "domain_xmax", layer_domain_xmin_col)
+
+      l_data <- transform_serial_position(l_data, layout, layer_x_col, layer_domain_x_col)
+      l_data <- transform_serial_position(l_data, layout, layer_xend_col, layer_domain_end_col)
+      l_data <- transform_serial_position(l_data, layout, layer_xmin_col, layer_domain_xmin_col)
+      l_data <- transform_serial_position(l_data, layout, layer_xmax_col, layer_domain_xmax_col)
+      plot$layers[[i]]$data <- l_data
     }
   }
 
@@ -303,6 +334,59 @@ ggplot_add.CoordSerial <- function(object, plot, ...) {
 
 # Helper to check for waive
 is.waive <- function(x) inherits(x, "waiver")
+
+
+mapped_col_name <- function(mapping, aesthetic, default = NULL) {
+  if (!is.null(mapping) && !is.null(mapping[[aesthetic]])) {
+    return(rlang::as_name(mapping[[aesthetic]]))
+  }
+
+  default
+}
+
+
+serial_domain_col <- function(data, mapped_col, fallback_col, default = NULL) {
+  if (!is.null(mapped_col) && mapped_col %in% names(data)) {
+    return(mapped_col)
+  }
+
+  if (fallback_col %in% names(data)) {
+    return(fallback_col)
+  }
+
+  default
+}
+
+
+append_serial_positions <- function(all_x, all_dom, data, position_col, domain_col) {
+  if (is.null(data) || is.null(position_col) || is.null(domain_col)) {
+    return(list(all_x = all_x, all_dom = all_dom))
+  }
+
+  if (!(position_col %in% names(data)) || !(domain_col %in% names(data))) {
+    return(list(all_x = all_x, all_dom = all_dom))
+  }
+
+  list(
+    all_x = c(all_x, data[[position_col]]),
+    all_dom = c(all_dom, as.character(data[[domain_col]]))
+  )
+}
+
+
+transform_serial_position <- function(data, layout, position_col, domain_col) {
+  if (is.null(data) || is.null(position_col) || is.null(domain_col)) {
+    return(data)
+  }
+
+  if (!(position_col %in% names(data)) || !(domain_col %in% names(data))) {
+    return(data)
+  }
+
+  domain_char <- as.character(data[[domain_col]])
+  data[[position_col]] <- data[[position_col]] + layout$offsets[domain_char]
+  data
+}
 
 
 # Small utility: NULL-default operator

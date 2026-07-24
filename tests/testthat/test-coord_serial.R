@@ -92,6 +92,62 @@ test_that("ggplot_add.CoordSerial transforms data correctly", {
     expect_equal(data$x, c(0, 9, 9, 13))
 })
 
+test_that("coord_serial transforms curve endpoints across domains", {
+    df <- data.frame(
+        pos = c(1, 10, 1, 5),
+        chr = c("1", "1", "2", "2"),
+        val = 1:4
+    )
+    links <- data.frame(
+        x = 10,
+        domain_x = "1",
+        xend = 5,
+        domain_end = "2",
+        y = 1,
+        yend = 2
+    )
+
+    p <- ggplot(df, aes(x = pos, y = val, domain = chr)) +
+        geom_point() +
+        geom_curve(
+            data = links,
+            aes(x = x, xend = xend, y = y, yend = yend),
+            inherit.aes = FALSE
+        ) +
+        coord_serial(domain_gap = 0)
+
+    expect_equal(p$layers[[2]]$data$x, 9)
+    expect_equal(p$layers[[2]]$data$xend, 13)
+})
+
+test_that("coord_serial transforms rect xmin/xmax across domains", {
+    df <- data.frame(
+        pos = c(1, 10, 1, 5),
+        chr = c("1", "1", "2", "2"),
+        val = 1:4
+    )
+    regions <- data.frame(
+        xmin = c(2, 2),
+        xmax = c(8, 4),
+        domain_xmin = c("1", "2"),
+        domain_xmax = c("1", "2"),
+        y = c(0.5, 0.5)
+    )
+
+    p <- ggplot(df, aes(x = pos, y = val, domain = chr)) +
+        geom_point() +
+        geom_rect(
+            data = regions,
+            aes(xmin = xmin, xmax = xmax, ymin = 0, ymax = y),
+            inherit.aes = FALSE,
+            alpha = 0.2
+        ) +
+        coord_serial(domain_gap = 0)
+
+    expect_equal(p$layers[[2]]$data$xmin, c(1, 10))
+    expect_equal(p$layers[[2]]$data$xmax, c(7, 12))
+})
+
 test_that("coord_serial handles missing domain aesthetic gracefully", {
     df <- data.frame(pos = 1:10, val = 1:10)
     p <- ggplot(df, aes(x = pos, y = val)) +
