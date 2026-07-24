@@ -1,6 +1,6 @@
 Package: coord.serial
 Title: Serial Coordinate System for ggplot2
-Version: 0.2.0
+Version: 1.1.0
 Authors@R: person("Daniel", "Wells", role = c("aut", "cre"),
     email = "daniel.wells@example.com")
 Description: A ggplot2 extension that provides a serial coordinate system
